@@ -1,6 +1,8 @@
 import { FastifyInstance } from "fastify";
 import { groq } from "@ai-sdk/groq";
 import { generateText } from "ai";
+import { projectTool } from '../../../ai/tools/project'
+import { companyTool } from '../../../ai/tools/company'
 
 export default async function (app: FastifyInstance) {
     app.get("/", (req, res) => {
@@ -14,13 +16,15 @@ export default async function (app: FastifyInstance) {
     }>('/', async (request, reply) => {
         const { prompt } = request.body;
         const response = await generateText({
-            model: groq('gemma2-9b-it'),
+            model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
             prompt,
-            // tools:   { postgres: postgresTool },
+            tools:   { 
+                project: projectTool,
+                company: companyTool,
+            },
             system: `
-                Você é um agente de IA responsável por responder dúvidas de um empreendimento imobiliário.
-                Inclua apenas o que o usuário pediu, sem texto adicional.
-                Retorne sempre em markdown, sem \`\`\`.
+                Você é um agente de IA que responde dúvidas sobre empreendimentos imobiliários.
+                Responda apenas o que for pedido, em markdown.
             `.trim(),
             maxSteps: 5
         });
