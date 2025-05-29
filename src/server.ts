@@ -1,20 +1,43 @@
-import autoLoad from "@fastify/autoload";
-import {FastifyInstance} from 'fastify';
-import {dirname, join} from 'path';
-import {fileURLToPath} from 'url';
+import cors from '@fastify/cors'
+import { FastifyTypedInstance } from "./types.ts";
+import fastifyEnv from '@fastify/env';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+const schema = {
+  type: 'object',
+  required: [ 'PORT' ],
+  properties: {
+    PORT: {
+      type: 'string',
+      default: '3001'
+    },
+    FRONTEND_PORT: {
+      type: 'string',
+      default: '3000'
+    },
+    GROQ_API_KEY: {
+        type: 'string'
+    }
+  }
+}
 
-export default async function (app: FastifyInstance) {
-  app.register(autoLoad, {
-    dir: join(__dirname, 'routes'),
-    options: { prefix: '/api' },
-    forceESM: true,
-  });
+const options = {
+  confKey: 'config',
+  schema: schema,
+  dotenv: true
+}
 
+export default async function (app: FastifyTypedInstance) {
+  app
+    .register(fastifyEnv, options)
+    .ready((err) => {
+        if (err) console.error(err)
+    })
 
-  app.ready(() => {
-    app.log.info(app.printRoutes());
-  });
+  await app.register(cors, {
+      origin: `http://localhost:${process.env.FRONTEND_PORT}`,
+      credentials: true
+  })
+
+  
+
 }
