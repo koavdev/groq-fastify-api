@@ -56,14 +56,13 @@ export const projectTool = tool({
         name: z.string().optional().describe('Nome do projeto a ser buscado. Se não informado, retorna lista de projetos'),
     }),
     execute: async ({ id, name }) => {7
-        console.log(id, name)
-        let url = "http://localhost:8002/api/admin/project/"
+        let url = process.env.BACKEND_URL + "/project/"
         if (id) url += `${id}/`
 
         const result = await fetch(url, {
             method: "GET",
             headers: {
-                Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ5MDUyMTA1LCJpYXQiOjE3NDg0NDczMDUsImp0aSI6ImM2MTllNmZjZWQzOTQ3ZDk5YjFlYzI4OWY5OWQzNmE5IiwidXNlcl9pZCI6MTYwMX0.3jGc3wc76bJqtsJF2Pd26nCoBxI61lEio8b79uhmv-g`
+                Authorization: `Bearer ${process.env.BACKEND_TOKEN}`
             }
         })  
         const data = await result.json()
