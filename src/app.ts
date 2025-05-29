@@ -1,10 +1,11 @@
 import fastify from "fastify";
 import buildServer from './server.ts'
-import { createGroq } from '@ai-sdk/groq'
-import { validatorCompiler, serializerCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import routes from '../src/routes/index.ts'
+import cors from '@fastify/cors'
+import { createGroq } from '@ai-sdk/groq'
+import { validatorCompiler, serializerCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
 
 const app = fastify({
     logger: {
@@ -14,10 +15,13 @@ const app = fastify({
     }
 }).withTypeProvider<ZodTypeProvider>();
 
+await app.register(cors, {
+    origin: '*',
+    credentials: true
+});
 
 app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)
-
 
 await app.register(buildServer);
 
@@ -37,7 +41,6 @@ await app.register(fastifySwaggerUi, {
 await app.register(routes)
 
 createGroq({ apiKey: process.env.GROQ_API_KEY });
-
 
 try {
     await app.listen({

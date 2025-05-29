@@ -1,14 +1,21 @@
-import cors from '@fastify/cors'
 import { FastifyTypedInstance } from "./types.ts";
 import fastifyEnv from '@fastify/env';
 
 const schema = {
   type: 'object',
-  required: [ 'PORT' ],
+  required: [ 'PORT', 'GROQ_API_KEY' ],
   properties: {
     PORT: {
       type: 'string',
       default: '3001'
+    },
+    BACKEND_TOKEN: {
+      type: 'string',
+      default: 'secrets'
+    },
+    BACKEND_URL: {
+      type: 'string',
+      default: 'http://localhost:8000'
     },
     FRONTEND_PORT: {
       type: 'string',
@@ -27,17 +34,8 @@ const options = {
 }
 
 export default async function (app: FastifyTypedInstance) {
-  app
-    .register(fastifyEnv, options)
+  app.register(fastifyEnv, options)
     .ready((err) => {
-        if (err) console.error(err)
-    })
-
-  await app.register(cors, {
-      origin: `http://localhost:${process.env.FRONTEND_PORT}`,
-      credentials: true
+      if (err) console.error(err)
   })
-
-  
-
 }
