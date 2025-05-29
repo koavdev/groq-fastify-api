@@ -13,7 +13,6 @@
   "license": "MIT",
   "dependencies": {
     "@ai-sdk/groq": "^1.2.9",
-    "@fastify/autoload": "^6.3.0",
     "@fastify/cors": "^11.0.1",
     "@fastify/env": "^5.0.2",
     "@fastify/swagger": "^9.5.1",
