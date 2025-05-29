@@ -7,7 +7,7 @@ import { companyTool } from "../../ai/tools/company.ts"
 import z from 'zod'
 
 export default async function (app: FastifyTypedInstance) {
-  app.post('/answer', {
+    app.post('/answer', {
         schema: {
             tags: ['ai'],
             description: 'Ask a question to AI',
@@ -15,7 +15,7 @@ export default async function (app: FastifyTypedInstance) {
                 prompt: z.string()
             })
         }
-    }, async (request: FastifyRequest, reply: FastifyReply) => {
+    }, async (request: FastifyRequest<{Body: { prompt: string }}>, reply: FastifyReply) => {
         const { prompt } = request.body;
         const response = await generateText({
             model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
