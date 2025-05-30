@@ -20,7 +20,7 @@ A REST API built with Fastify that integrates with the Groq API for natural lang
 
 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/groq-fastify-api.git
+git clone https://github.com/koavdev/groq-fastify-api.git
 cd groq-fastify-api
 ```
 
