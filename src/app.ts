@@ -5,7 +5,7 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import routes from '../src/routes/index.ts'
 import cors from '@fastify/cors'
 import { createGroq } from '@ai-sdk/groq'
-import { validatorCompiler, serializerCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
+import { validatorCompiler, serializerCompiler, ZodTypeProvider, jsonSchemaTransform } from "fastify-type-provider-zod";
 
 const app = fastify({
     logger: {
@@ -27,11 +27,37 @@ await app.register(buildServer);
 
 await app.register(fastifySwagger, {
     openapi: {
+        openapi: '3.0.0',
         info: {
             title: 'Groq Fastify API',
-            version: '1.0.0',
-        }
-    }
+            description: 'Testing the Groq API',
+            version: '0.1.0'
+        },
+        servers: [
+            {
+                url: `http://localhost:${process.env.PORT}`,
+                description: 'Development server'
+            }
+        ],
+        tags: [
+            { name: 'ai', description: 'Groq API' },
+            { name: 'health', description: 'Health Check' },
+        ],
+        components: {
+            securitySchemes: {
+                apiKey: {
+                    type: 'apiKey',
+                    name: 'apiKey',
+                    in: 'header'
+                }
+            }
+        },
+        externalDocs: {
+            url: 'https://swagger.io',
+            description: 'Find more info here'
+        },
+    },
+    transform: jsonSchemaTransform
 })
 
 await app.register(fastifySwaggerUi, {
