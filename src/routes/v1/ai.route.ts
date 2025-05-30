@@ -1,44 +1,49 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { FastifyTypedInstance } from "../..//types.ts"
-import { generateText } from "ai"
+import { streamText, UIMessage } from "ai"
 import { groq } from "@ai-sdk/groq"
 import { projectTool } from "../../ai/tools/project.ts"
 import { companyTool } from "../../ai/tools/company.ts"
 import z from 'zod'
 
 export default async function (app: FastifyTypedInstance) {
-    app.post('/answer', {
+    app.post('/chat', {
         schema: {
             tags: ['ai'],
-            description: 'Ask a question to AI',
+            description: 'Chat with Groq Fastify API',
             body: z.object({
-                prompt: z.string()
-            })
+                messages: z.array(
+                    z.object({
+                        role: z.string().describe('role'),
+                        content: z.string().describe('content')
+                    })
+                )
+            }),
         }
-    }, async (request: FastifyRequest<{Body: { prompt: string }}>, reply: FastifyReply) => {
-        const { prompt } = request.body;
-        const response = await generateText({
+    }, (request: FastifyRequest<{Body: { messages: UIMessage[] }}>, reply: FastifyReply) => {
+        const { messages } = request.body;
+        const result = streamText({
             model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
-            prompt,
+            messages,
             tools:   { 
                 project: projectTool,
                 company: companyTool,
             },
             system: `
                 Você é um agente de IA que responde dúvidas sobre empreendimentos imobiliários.
-                Responda apenas o que for pedido, em markdown.
+                Responda apenas o que for pedido, em plain text.
             `.trim(),
             maxSteps: 5
         });
-        reply.status(201).send({ text: response.text })
+        return result.toDataStreamResponse();
     });
 
-       app.get("/", {
+    app.get("/", {
         schema: {
             tags: ['ai'],
             description: 'GET AI'
         }
     }, (_, reply: FastifyReply) => {
-        reply.status(200).send("urbe.ai")
+        reply.status(200).send("Groq Fastify API")
     })
 }
